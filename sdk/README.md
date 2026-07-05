@@ -15,9 +15,11 @@ npm install @privacy-protocol/cloak viem wagmi @tanstack/react-query
 ## Core (TypeScript / Node / any framework)
 
 ```ts
-import { createCloakClient, LocalStorageNoteStore } from "@privacy-protocol/cloak";
+import { createCloakClient, LocalStorageNoteStore, deployments } from "@privacy-protocol/cloak";
 import { createPublicClient, createWalletClient, custom, http } from "viem";
 import { sepolia } from "viem/chains";
+
+const { poolAddress, deployBlock } = deployments.sepolia;
 
 const publicClient = createPublicClient({ chain: sepolia, transport: http() });
 const walletClient = createWalletClient({ chain: sepolia, transport: custom(window.ethereum) });
@@ -26,9 +28,10 @@ const cloak = createCloakClient({
   publicClient,
   walletClient,
   chainId: sepolia.id,
-  poolAddress: "0xPool...",
+  poolAddress,
+  deployBlock,
   relayerUrl: "https://cloak-relayer.onrender.com",
-  store: new LocalStorageNoteStore(sepolia.id, "0xPool..."),
+  store: new LocalStorageNoteStore(sepolia.id, poolAddress),
 });
 
 // 1. Deposit (public — the user signs and pays).
@@ -54,7 +57,7 @@ import { CloakProvider, useDeposit, useCloakSend, useNotes, useClaimables } from
 
 function App() {
   return (
-    <CloakProvider poolAddress="0xPool..." relayerUrl="https://cloak-relayer.onrender.com">
+    <CloakProvider poolAddress={deployments.sepolia.poolAddress} relayerUrl="https://cloak-relayer.onrender.com">
       <Wallet />
     </CloakProvider>
   );

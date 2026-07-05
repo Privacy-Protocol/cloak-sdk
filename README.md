@@ -59,6 +59,15 @@ cd sdk && npm install && npm run build && npm test
 2. Deploy the relayer (see [`relayer/README.md`](relayer/README.md)); set `POOL_ADDRESS`, fund the relayer key.
 3. Point the SDK at the pool address + relayer URL.
 
+## Sepolia deployment
+
+| Contract | Address |
+| --- | --- |
+| `CloakPool` | [`0x8Aa022f478F42c7c0Da14B5D9Ae8EFD89FC47c97`](https://sepolia.etherscan.io/address/0x8Aa022f478F42c7c0Da14B5D9Ae8EFD89FC47c97) |
+| `HonkVerifier` | [`0x87d1D1E6345A1d80DaA60B2B153d7F64d0BBfdd7`](https://sepolia.etherscan.io/address/0x87d1D1E6345A1d80DaA60B2B153d7F64d0BBfdd7) |
+
+Deploy block `11207404`. The SDK exports these as `deployments.sepolia`.
+
 ## Status
 
 v1 targets Sepolia (ETH + ERC-20), arbitrary amounts, zero-fee sponsored

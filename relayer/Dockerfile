@@ -1,5 +1,7 @@
 # Build
-FROM rust:1.83-slim AS builder
+# alloy (transitive: alloy-chains) requires the Rust 2024 edition, stabilized
+# in Rust 1.85 — the builder image must be at least that new.
+FROM rust:1-slim-bookworm AS builder
 WORKDIR /app
 RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
 COPY Cargo.toml Cargo.lock ./

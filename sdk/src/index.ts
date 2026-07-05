@@ -24,3 +24,6 @@ export type { NoteStore } from "./store";
 
 export { cloakPoolAbi, erc20Abi } from "./abi";
 export { FIELD_PRIME, TREE_HEIGHT, ZERO_VALUE, ETH_ADDRESS } from "./constants";
+
+export { deployments, getDeployment } from "./deployments";
+export type { CloakDeployment } from "./deployments";
