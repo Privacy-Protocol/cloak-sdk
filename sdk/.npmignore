@@ -1,0 +1,8 @@
+.env
+.env.local
+node_modules/
+test/
+scripts/
+src/
+tsconfig.json
+tsup.config.ts

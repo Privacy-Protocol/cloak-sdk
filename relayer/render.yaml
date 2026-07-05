@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: cloak-relayer
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: RPC_URL
+        sync: false        # set in the Render dashboard (Sepolia RPC)
+      - key: PRIVATE_KEY
+        sync: false        # relayer / gas-sponsor key; keep secret
+      - key: POOL_ADDRESS
+        sync: false        # deployed CloakPool address
+      - key: MIN_FEE
+        value: "0"
+      - key: RUST_LOG
+        value: cloak_relayer=info,tower_http=info

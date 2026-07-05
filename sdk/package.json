@@ -1,0 +1,67 @@
+{
+  "name": "@privacy-protocol/cloak",
+  "version": "0.1.0",
+  "description": "Anonymous transactions for any dapp — a privacy-pools SDK. Deposit, forward, withdraw and claim through zk proofs and a relayer, no contracts to write or deploy.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./react": {
+      "types": "./dist/react/index.d.ts",
+      "import": "./dist/react/index.js",
+      "require": "./dist/react/index.cjs"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@aztec/bb.js": "3.0.0-nightly.20251104",
+    "@noir-lang/noir_js": "1.0.0-beta.16"
+  },
+  "peerDependencies": {
+    "viem": "^2.21.0",
+    "wagmi": "^2.12.0",
+    "@tanstack/react-query": "^5.0.0",
+    "react": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "wagmi": { "optional": true },
+    "@tanstack/react-query": { "optional": true },
+    "react": { "optional": true }
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "^5.59.0",
+    "@types/react": "^18.3.0",
+    "react": "^18.3.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "viem": "^2.21.0",
+    "vitest": "^2.1.0",
+    "wagmi": "^2.12.0"
+  },
+  "keywords": [
+    "privacy",
+    "zk",
+    "noir",
+    "privacy-pools",
+    "anonymous",
+    "ethereum",
+    "viem",
+    "wagmi"
+  ]
+}

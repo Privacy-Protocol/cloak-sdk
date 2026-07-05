@@ -1,0 +1,21 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+remappings = ["poseidon2-evm/=lib/poseidon2-evm/src/"]
+fs_permissions = [{ access = "read", path = "./test/fixtures" }]
+# The generated Honk verifier and the pool (which inlines the Poseidon2 Yul
+# permutation) both exceed the 24 KB EIP-170 limit unless the optimizer runs.
+# Low runs optimizes for deployed bytecode size; via_ir squeezes the verifier
+# the rest of the way under the limit.
+optimizer = true
+optimizer_runs = 1
+bytecode_hash = "none"
+
+[rpc_endpoints]
+sepolia = "${SEPOLIA_RPC_URL}"
+
+[etherscan]
+sepolia = { key = "${ETHERSCAN_API_KEY}", chain = 11155111 }
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
