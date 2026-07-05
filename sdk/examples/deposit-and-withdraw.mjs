@@ -52,7 +52,16 @@ const fileStore = {
   },
 };
 
-const cloak = createCloakClient({ ...deployments.sepolia, publicClient, walletClient, store: fileStore });
+// Lower this for rate-limited RPCs (Alchemy free tier caps eth_getLogs at 10).
+const logChunkSize = process.env.LOG_CHUNK_SIZE ? BigInt(process.env.LOG_CHUNK_SIZE) : undefined;
+
+const cloak = createCloakClient({
+  ...deployments.sepolia,
+  publicClient,
+  walletClient,
+  store: fileStore,
+  ...(logChunkSize ? { logChunkSize } : {}),
+});
 
 console.log("depositor:", account.address);
 console.log("recipient:", recipient);

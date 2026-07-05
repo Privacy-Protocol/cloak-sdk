@@ -14,6 +14,20 @@ import { type Intent, computeIntentHash, toField32 } from "./intent";
 import { proveSpend } from "./prover";
 import { poseidon2 } from "./poseidon";
 
+/** Flatten a (possibly nested) error's message/details/cause into one string. */
+function errorText(e: unknown): string {
+  const parts: string[] = [];
+  let cur: unknown = e;
+  for (let i = 0; i < 5 && cur; i++) {
+    const o = cur as { message?: string; details?: string; shortMessage?: string; cause?: unknown };
+    if (o.message) parts.push(o.message);
+    if (o.details) parts.push(o.details);
+    if (o.shortMessage) parts.push(o.shortMessage);
+    cur = o.cause;
+  }
+  return parts.join(" ");
+}
+
 export interface CloakConfig {
   publicClient: PublicClient;
   /** Required for deposits (which the user signs) and reads. */
@@ -23,6 +37,11 @@ export interface CloakConfig {
   chainId: number;
   /** Block the pool was deployed at, to bound log queries. */
   deployBlock?: bigint;
+  /**
+   * Max block span per `eth_getLogs` request during sync. Lower it for
+   * rate-limited RPCs (e.g. Alchemy free tier caps at 10). Default 500.
+   */
+  logChunkSize?: bigint;
   /** Note persistence. Defaults to in-memory (lost on reload). */
   store?: NoteStore;
 }
@@ -223,7 +242,9 @@ export class CloakClient {
       const errText = await res.text();
       throw new Error(`relay failed: ${res.status} ${errText}`);
     }
-    const { txHash } = (await res.json()) as { txHash: Hex };
+    // Relayer responds with snake_case { id, tx_hash, status }.
+    const relayed = (await res.json()) as { tx_hash?: Hex; txHash?: Hex; id?: Hex };
+    const txHash = (relayed.tx_hash ?? relayed.txHash ?? relayed.id) as Hex;
 
     // Update local note state.
     changeNote.kind = "change";
@@ -261,13 +282,12 @@ export class CloakClient {
    */
   async sync(): Promise<MerkleTree> {
     const fromBlock = this.config.deployBlock ?? 0n;
-    const address = this.config.poolAddress;
-    const pc = this.config.publicClient;
+    const toBlock = await this.config.publicClient.getBlockNumber();
 
     const [deposits, spents, claims] = await Promise.all([
-      pc.getContractEvents({ address, abi: cloakPoolAbi, eventName: "Deposit", fromBlock }),
-      pc.getContractEvents({ address, abi: cloakPoolAbi, eventName: "Spent", fromBlock }),
-      pc.getContractEvents({ address, abi: cloakPoolAbi, eventName: "ClaimNoteCreated", fromBlock }),
+      this._getEvents("Deposit", fromBlock, toBlock),
+      this._getEvents("Spent", fromBlock, toBlock),
+      this._getEvents("ClaimNoteCreated", fromBlock, toBlock),
     ]);
 
     const entries: { leafIndex: number; commitment: bigint }[] = [];
@@ -315,6 +335,43 @@ export class CloakClient {
   /** Discovered, unspent claim notes ready to withdraw. */
   async getClaimables(): Promise<Note[]> {
     return (await this.store.all()).filter((n) => n.kind === "claim" && !n.spent && n.leafIndex !== undefined);
+  }
+
+  /**
+   * Fetch a pool event across [fromBlock, toBlock], paging in `logChunkSize`
+   * spans so rate-limited RPCs (which cap eth_getLogs block ranges) still work.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private async _getEvents(
+    eventName: "Deposit" | "Spent" | "ClaimNoteCreated",
+    fromBlock: bigint,
+    toBlock: bigint,
+  ): Promise<any[]> {
+    const address = this.config.poolAddress;
+    const pc = this.config.publicClient;
+    const chunk = this.config.logChunkSize ?? 500n;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const all: any[] = [];
+    for (let start = fromBlock; start <= toBlock; start += chunk) {
+      const end = start + chunk - 1n < toBlock ? start + chunk - 1n : toBlock;
+      let events;
+      try {
+        events = await pc.getContractEvents({ address, abi: cloakPoolAbi, eventName, fromBlock: start, toBlock: end });
+      } catch (e) {
+        // Load-balanced RPCs can serve a node whose head lags the block number
+        // we sampled, rejecting `toBlock` as "beyond head". Retry the chunk
+        // against that node's own latest block. viem tucks the RPC detail into
+        // nested error fields, so search the whole chain.
+        if (/head|beyond/i.test(errorText(e))) {
+          events = await pc.getContractEvents({ address, abi: cloakPoolAbi, eventName, fromBlock: start, toBlock: "latest" });
+        } else {
+          throw e;
+        }
+      }
+      all.push(...events);
+    }
+    return all;
   }
 
   // ------------------------------------------------------------------ helpers

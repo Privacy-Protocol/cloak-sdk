@@ -3,6 +3,19 @@
   "version": "0.1.0",
   "description": "Anonymous transactions for any dapp — a privacy-pools SDK. Deposit, forward, withdraw and claim through zk proofs and a relayer, no contracts to write or deploy.",
   "license": "MIT",
+  "author": "Privacy Protocol",
+  "homepage": "https://github.com/Privacy-Protocol/cloak-sdk#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Privacy-Protocol/cloak-sdk.git",
+    "directory": "sdk"
+  },
+  "bugs": {
+    "url": "https://github.com/Privacy-Protocol/cloak-sdk/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "sideEffects": false,
   "files": [
@@ -29,7 +42,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "smoke": "node scripts/live-smoke.mjs",
-    "example:e2e": "node examples/deposit-and-withdraw.mjs"
+    "example:e2e": "node examples/deposit-and-withdraw.mjs",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@aztec/bb.js": "3.0.0-nightly.20251104",
