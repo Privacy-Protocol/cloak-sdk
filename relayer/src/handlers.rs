@@ -166,9 +166,21 @@ pub async fn relay(
         fee,
     };
 
+    // Fetch the true pending nonce for each submission rather than trusting a
+    // cached value, so the relayer self-heals from any nonce drift (a restart,
+    // an out-of-band ops tx, or a reorg). Without this a stale cached nonce
+    // wedges every relay with "nonce too low".
+    let nonce = st
+        .provider
+        .get_transaction_count(st.relayer_address)
+        .pending()
+        .await
+        .map_err(|e| err(StatusCode::BAD_GATEWAY, format!("nonce fetch failed: {e}")))?;
+
     // Submit. Gas estimation happens during fill; a would-be revert surfaces here.
     let pending = pool
         .spend(sp, intent)
+        .nonce(nonce)
         .send()
         .await
         .map_err(|e| err(StatusCode::BAD_REQUEST, format!("submission failed: {e}")))?;

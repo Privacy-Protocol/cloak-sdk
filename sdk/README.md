@@ -19,19 +19,15 @@ import { createCloakClient, LocalStorageNoteStore, deployments } from "@privacy-
 import { createPublicClient, createWalletClient, custom, http } from "viem";
 import { sepolia } from "viem/chains";
 
-const { poolAddress, deployBlock } = deployments.sepolia;
-
 const publicClient = createPublicClient({ chain: sepolia, transport: http() });
 const walletClient = createWalletClient({ chain: sepolia, transport: custom(window.ethereum) });
 
+// deployments.sepolia carries chainId, poolAddress, deployBlock and relayerUrl.
 const cloak = createCloakClient({
+  ...deployments.sepolia,
   publicClient,
   walletClient,
-  chainId: sepolia.id,
-  poolAddress,
-  deployBlock,
-  relayerUrl: "https://cloak-relayer.onrender.com",
-  store: new LocalStorageNoteStore(sepolia.id, poolAddress),
+  store: new LocalStorageNoteStore(sepolia.id, deployments.sepolia.poolAddress),
 });
 
 // 1. Deposit (public — the user signs and pays).
@@ -86,6 +82,19 @@ function Wallet() {
 - Deposits are public (asset, amount, and your address are visible on-chain). Anonymity comes from the shared set + relayer at spend time, so deposit early and let the set grow.
 - Arbitrary amounts are supported, but a distinctive deposit amount followed by a distinctive spend can be correlated. Prefer round amounts and add delay between deposit and spend.
 - **Your notes are your funds.** Persist the `NoteStore` durably and privately; losing a note's `secret`/`nullifierKey` means the funds are unrecoverable.
+
+## Verify against the live deployment
+
+```bash
+npm run build
+
+# read-only: confirms the SDK's tree root matches the on-chain pool and the
+# relayer /info is correctly configured (no wallet needed)
+npm run smoke                     # uses a public RPC; override with SEPOLIA_RPC_URL
+
+# full deposit -> withdraw cycle (needs a FUNDED Sepolia key)
+SEPOLIA_RPC_URL=... PRIVATE_KEY=0x... npm run example:e2e
+```
 
 ## API
 

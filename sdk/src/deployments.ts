@@ -7,6 +7,8 @@ export interface CloakDeployment {
   verifierAddress: Address;
   /** Block the pool was deployed at — pass as `deployBlock` to speed up sync. */
   deployBlock: bigint;
+  /** Hosted relayer for this deployment. */
+  relayerUrl: string;
 }
 
 /** Canonical, PP-maintained deployments. */
@@ -16,6 +18,7 @@ export const deployments = {
     poolAddress: "0x8Aa022f478F42c7c0Da14B5D9Ae8EFD89FC47c97",
     verifierAddress: "0x87d1D1E6345A1d80DaA60B2B153d7F64d0BBfdd7",
     deployBlock: 11207404n,
+    relayerUrl: "https://cloak-relayer.onrender.com",
   },
 } as const satisfies Record<string, CloakDeployment>;
 

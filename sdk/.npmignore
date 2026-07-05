@@ -6,3 +6,4 @@ scripts/
 src/
 tsconfig.json
 tsup.config.ts
+examples/
