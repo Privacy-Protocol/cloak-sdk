@@ -30,4 +30,11 @@ forge test          # 16 tests: full lifecycle, Poseidon2 cross-compat vectors, 
 forge script script/Deploy.s.sol --rpc-url sepolia --broadcast --verify
 ```
 
-Current Sepolia deployment: `CloakPool` [`0x8Aa022f478F42c7c0Da14B5D9Ae8EFD89FC47c97`](https://sepolia.etherscan.io/address/0x8Aa022f478F42c7c0Da14B5D9Ae8EFD89FC47c97), `HonkVerifier` [`0x87d1D1E6345A1d80DaA60B2B153d7F64d0BBfdd7`](https://sepolia.etherscan.io/address/0x87d1D1E6345A1d80DaA60B2B153d7F64d0BBfdd7) (block `11207404`).
+Current deployments:
+
+| Network | `CloakPool` | `HonkVerifier` | Block |
+| --- | --- | --- | --- |
+| Sepolia | [`0x8Aa0…7c97`](https://sepolia.etherscan.io/address/0x8Aa022f478F42c7c0Da14B5D9Ae8EFD89FC47c97) | [`0x87d1…fdd7`](https://sepolia.etherscan.io/address/0x87d1D1E6345A1d80DaA60B2B153d7F64d0BBfdd7) | `11207404` |
+| Base Sepolia | [`0xBBd4…57fE`](https://sepolia.basescan.org/address/0xBBd45437D3132AB6F2cF44c1696E634EEdA057fE) | [`0xAb88…750F`](https://sepolia.basescan.org/address/0xAb8814Efd0C7a447C00Bc59F441134C23B15750F) | `44318778` |
+
+For Base Sepolia use `--rpc-url base_sepolia` (needs `BASE_SEPOLIA_RPC_URL`). If in-script verification fails, verify manually with `forge verify-contract` passing explicit `--constructor-args` (pool) and `--libraries` for `ZKTranscriptLib` (verifier).

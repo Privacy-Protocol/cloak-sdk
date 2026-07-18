@@ -20,6 +20,13 @@ export const deployments = {
     deployBlock: 11207404n,
     relayerUrl: "https://cloak-relayer.onrender.com",
   },
+  baseSepolia: {
+    chainId: 84532,
+    poolAddress: "0xBBd45437D3132AB6F2cF44c1696E634EEdA057fE",
+    verifierAddress: "0xAb8814Efd0C7a447C00Bc59F441134C23B15750F",
+    deployBlock: 44318778n,
+    relayerUrl: "https://cloak-relayer-base.onrender.com",
+  },
 } as const satisfies Record<string, CloakDeployment>;
 
 /** Look up a deployment by chain id. */

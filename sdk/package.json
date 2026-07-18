@@ -1,6 +1,6 @@
 {
   "name": "@privacy-protocol/cloak",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Anonymous transactions for any dapp — a privacy-pools SDK. Deposit, forward, withdraw and claim through zk proofs and a relayer, no contracts to write or deploy.",
   "license": "MIT",
   "author": "Privacy Protocol",
@@ -56,9 +56,15 @@
     "react": ">=18"
   },
   "peerDependenciesMeta": {
-    "wagmi": { "optional": true },
-    "@tanstack/react-query": { "optional": true },
-    "react": { "optional": true }
+    "wagmi": {
+      "optional": true
+    },
+    "@tanstack/react-query": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@tanstack/react-query": "^5.59.0",

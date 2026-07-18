@@ -4,7 +4,7 @@
 
 [![npm](https://img.shields.io/npm/v/%40privacy-protocol%2Fcloak)](https://www.npmjs.com/package/@privacy-protocol/cloak)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
-[![Network: Sepolia](https://img.shields.io/badge/Network-Sepolia-8A2BE2)](#deployments)
+[![Networks: Sepolia | Base Sepolia](https://img.shields.io/badge/Networks-Sepolia%20%7C%20Base%20Sepolia-8A2BE2)](#deployments)
 
 Cloak lets you add **anonymous transactions** to any dapp without writing a circuit, deploying a contract, or running infrastructure. It is a privacy-pools layer: users deposit funds under a commitment, then forward transactions, withdraw, or claim returned funds through zero-knowledge proofs relayed on their behalf — so the on-chain trail never links back to them. Install a TypeScript package, call a few functions (or React hooks), and your users transact privately against contracts that are already deployed.
 
@@ -130,7 +130,19 @@ Because every execution detail is bound into the proof, the relayer is trusted *
 | `HonkVerifier` | [`0x87d1D1E6345A1d80DaA60B2B153d7F64d0BBfdd7`](https://sepolia.etherscan.io/address/0x87d1D1E6345A1d80DaA60B2B153d7F64d0BBfdd7) |
 | Relayer | [`https://cloak-relayer.onrender.com`](https://cloak-relayer.onrender.com/info) (zero fee, sponsors gas on testnet) |
 
-Deploy block `11207404`. The SDK ships these as `deployments.sepolia` — spread it straight into `createCloakClient`. Native ETH and ERC-20, arbitrary amounts. Ethereum mainnet and L2s are planned ([roadmap](#roadmap)).
+Deploy block `11207404`. Ships in the SDK as `deployments.sepolia`.
+
+### Base Sepolia (chain id `84532`)
+
+| Component | Address / URL |
+| --- | --- |
+| `CloakPool` | [`0xBBd45437D3132AB6F2cF44c1696E634EEdA057fE`](https://sepolia.basescan.org/address/0xBBd45437D3132AB6F2cF44c1696E634EEdA057fE) |
+| `HonkVerifier` | [`0xAb8814Efd0C7a447C00Bc59F441134C23B15750F`](https://sepolia.basescan.org/address/0xAb8814Efd0C7a447C00Bc59F441134C23B15750F) |
+| Relayer | [`https://cloak-relayer-base.onrender.com`](https://cloak-relayer-base.onrender.com/info) |
+
+Deploy block `44318778`. Ships in the SDK as `deployments.baseSepolia`.
+
+All contracts are verified on their explorers. Spread a deployment straight into `createCloakClient` — native ETH and ERC-20, arbitrary amounts.
 
 ## Repository layout
 
