@@ -194,8 +194,14 @@ export class CloakClient {
     };
     const intentHash = computeIntentHash(this.config.chainId, this.config.poolAddress, intent);
 
-    // Build the merkle proof for the note being spent.
-    const tree = await this.sync();
+    // Build the merkle proof for the note being spent. RPC log indexes can
+    // lag the chain head right after a deposit, so briefly retry until the
+    // note's leaf is visible.
+    let tree = await this.sync();
+    for (let i = 0; i < 5 && note.leafIndex >= tree.leafCount; i++) {
+      await new Promise((r) => setTimeout(r, 3000));
+      tree = await this.sync();
+    }
     const { siblings, root } = tree.proof(note.leafIndex);
     const nullifierHash = await computeNullifier(note.nullifierKey, note.leafIndex);
 

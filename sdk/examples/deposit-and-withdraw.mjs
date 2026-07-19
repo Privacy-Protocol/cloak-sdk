@@ -1,4 +1,4 @@
-// End-to-end example against the LIVE Sepolia deployment.
+// End-to-end example against a LIVE deployment (NETWORK=sepolia | baseSepolia).
 //
 // Deposits a small amount of ETH, then privately withdraws it to a recipient
 // via the relayer — exercising deposit -> prove -> relay -> spend on-chain.
@@ -13,23 +13,28 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { createPublicClient, createWalletClient, http, parseEther, formatEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { sepolia } from "viem/chains";
+import { sepolia, baseSepolia } from "viem/chains";
 import { createCloakClient, deployments, ETH_ADDRESS } from "../dist/index.js";
 
-const RPC = process.env.SEPOLIA_RPC_URL;
+// NETWORK=sepolia (default) or baseSepolia — picks chain, deployment, and note file.
+const NETWORK = process.env.NETWORK ?? "sepolia";
+const chain = { sepolia, baseSepolia }[NETWORK];
+const deployment = deployments[NETWORK];
+if (!chain || !deployment) throw new Error(`unknown NETWORK: ${NETWORK}`);
+const RPC = process.env.RPC_URL ?? process.env.SEPOLIA_RPC_URL;
 const PK = process.env.PRIVATE_KEY;
-if (!RPC || !PK) throw new Error("set SEPOLIA_RPC_URL and PRIVATE_KEY");
+if (!RPC || !PK) throw new Error("set RPC_URL and PRIVATE_KEY");
 
 const account = privateKeyToAccount(PK.startsWith("0x") ? PK : `0x${PK}`);
 const recipient = process.env.RECIPIENT ?? account.address;
 const amount = parseEther(process.env.AMOUNT_ETH ?? "0.002");
 
 const transport = http(RPC, { retryCount: 8, retryDelay: 1500, timeout: 30_000 });
-const publicClient = createPublicClient({ chain: sepolia, transport });
-const walletClient = createWalletClient({ account, chain: sepolia, transport });
+const publicClient = createPublicClient({ chain, transport });
+const walletClient = createWalletClient({ account, chain, transport });
 
 // --- persistent, crash-safe note store (JSON file) ---
-const FILE = new URL("../.cloak-notes.json", import.meta.url);
+const FILE = new URL(NETWORK === "sepolia" ? "../.cloak-notes.json" : `../.cloak-notes.${NETWORK}.json`, import.meta.url);
 const reviver = (k, v) =>
   ["secret", "nullifierKey", "amount", "commitment"].includes(k) && typeof v === "string" ? BigInt(v) : v;
 const replacer = (_k, v) => (typeof v === "bigint" ? v.toString() : v);
@@ -56,7 +61,7 @@ const fileStore = {
 const logChunkSize = process.env.LOG_CHUNK_SIZE ? BigInt(process.env.LOG_CHUNK_SIZE) : undefined;
 
 const cloak = createCloakClient({
-  ...deployments.sepolia,
+  ...deployment,
   publicClient,
   walletClient,
   store: fileStore,
@@ -84,17 +89,18 @@ const { txHash } = await cloak.withdraw({ note, to: recipient });
 console.log("  relayer submitted tx:", txHash);
 
 // Poll the relayer for status.
-const base = deployments.sepolia.relayerUrl.replace(/\/$/, "");
+const base = deployment.relayerUrl.replace(/\/$/, "");
 for (let i = 0; i < 30; i++) {
   const res = await fetch(`${base}/status/${txHash}`);
   const s = await res.json();
   console.log("  status:", s.status, s.block_number ? `(block ${s.block_number})` : "");
   if (s.status === "success") {
     console.log("\n✅ done — withdrawal confirmed on-chain:");
-    console.log(`   https://sepolia.etherscan.io/tx/${txHash}`);
+    const explorer = NETWORK === "baseSepolia" ? "https://sepolia.basescan.org" : "https://sepolia.etherscan.io";
+    console.log(`   ${explorer}/tx/${txHash}`);
     process.exit(0);
   }
   if (s.status === "failed") throw new Error("withdrawal reverted on-chain");
   await new Promise((r) => setTimeout(r, 5000));
 }
-console.log("\n⚠️ still pending after ~150s; check the tx hash on Sepolia Etherscan.");
+console.log("\n⚠️ still pending after ~150s; check the tx hash on the network explorer.");
